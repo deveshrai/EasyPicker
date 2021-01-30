@@ -1,0 +1,29 @@
+<RCC>
+    <qresource prefix="/new/Icons">
+        <file>icons8-capacitor-96.png</file>
+        <file>icons8-circuit-80.png</file>
+        <file>icons8-help-80.png</file>
+        <file>icons8-import-csv-80.png</file>
+        <file>icons8-launch-80.png</file>
+        <file>icons8-led-diode-80.png</file>
+        <file>icons8-manual-80.png</file>
+        <file>icons8-microchip-80.png</file>
+        <file>icons8-new-80.png</file>
+        <file>icons8-obstruction-lights-on-80.png</file>
+        <file>icons8-obstruction-lights-settings-80.png</file>
+        <file>icons8-open-box-80.png</file>
+        <file>icons8-oscillator-80.png</file>
+        <file>icons8-processor-80.png</file>
+        <file>icons8-resistor-80.png</file>
+        <file>icons8-settings-80.png</file>
+        <file>icons8-transistor-80.png</file>
+        <file>icons8-usb-micro-a-80.png</file>
+        <file>icons8-capacitor-80.png</file>
+        <file>icons8-question-mark-96.png</file>
+        <file>down-100.png</file>
+        <file>left-100.png</file>
+        <file>right-100.png</file>
+        <file>up-100.png</file>
+        <file>transparent100-100.png</file>
+    </qresource>
+</RCC>
