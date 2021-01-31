@@ -42,6 +42,8 @@ private slots:
 
     void on_cameraComboBox_activated(const QString &arg1);
 
+    void on_MainWindow_destroyed();
+
 private:
     bool populateTableFromCSV(QString csvFileName);
     void populateCameraList(void);

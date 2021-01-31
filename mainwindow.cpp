@@ -17,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete ui;
+    exit(0);
 }
 void MainWindow::populateCameraList(void)
 {
@@ -61,14 +62,15 @@ bool MainWindow::findAndStartCamera(void)
             delete overlayCross;
 
         this->overlayCross=new QLabel();
-        QPixmap * pix=new QPixmap(100,100);//(":/new/Icons/transparent100-100.png");
+        QPixmap pix(100,100);//(":/new/Icons/transparent100-100.png");
+        //pix->swap(QPixmap());
         //pix->fill(QColor(255,255,255,255));
-        QPainter * paint = new QPainter(pix);
-        paint->fillRect(0,0,100,100,QBrush(QColor(255,255,255,0)));
-        paint->setPen(*(new QColor(Qt::green)));
-        paint->drawLine(0,50,100,50);
-        paint->drawLine(50,0,50,100);
-        overlayCross->setPixmap(*pix);
+        QPainter paint(&pix);
+        paint.fillRect(0,0,100,100,QBrush(QColor(255,255,255,0)));
+        paint.setPen(*(new QColor(Qt::green)));
+        paint.drawLine(0,50,100,50);
+        paint.drawLine(50,0,50,100);
+        overlayCross->setPixmap(pix);
 
         ui->gridLayout->removeWidget(ui->cameraView);
         ui->gridLayout->addWidget(ui->cameraView,0,0,Qt::AlignHCenter|Qt::AlignVCenter);
@@ -82,8 +84,8 @@ bool MainWindow::findAndStartCamera(void)
         camera->start();
 
         //delete camera;
-        delete paint;
-        delete pix;
+        //delete paint;
+        //delete pix;
     }
     return cameraFound;
 }
@@ -208,3 +210,8 @@ void MainWindow::on_tableWidget_cellActivated(int row, int column)
 }
 
 
+
+void MainWindow::on_MainWindow_destroyed()
+{
+
+}
