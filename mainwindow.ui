@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>716</width>
+    <width>1050</width>
     <height>819</height>
    </rect>
   </property>
@@ -287,6 +287,9 @@
                     <height>40</height>
                    </size>
                   </property>
+                  <property name="shortcut">
+                   <string>Shift+Num+Up</string>
+                  </property>
                   <property name="flat">
                    <bool>true</bool>
                   </property>
@@ -318,6 +321,9 @@
                     <width>40</width>
                     <height>40</height>
                    </size>
+                  </property>
+                  <property name="shortcut">
+                   <string>Shift+Num+Down</string>
                   </property>
                   <property name="flat">
                    <bool>true</bool>
@@ -363,23 +369,6 @@
                </property>
               </widget>
              </item>
-             <item>
-              <widget class="QPushButton" name="pushButton_2">
-               <property name="text">
-                <string>Home</string>
-               </property>
-               <property name="icon">
-                <iconset resource="Icons.qrc">
-                 <normaloff>:/new/Icons/icons8-home-address-100.png</normaloff>:/new/Icons/icons8-home-address-100.png</iconset>
-               </property>
-               <property name="iconSize">
-                <size>
-                 <width>30</width>
-                 <height>30</height>
-                </size>
-               </property>
-              </widget>
-             </item>
             </layout>
            </item>
            <item>
@@ -398,24 +387,6 @@
                </property>
               </widget>
              </item>
-             <item>
-              <widget class="QPushButton" name="pushButton">
-               <property name="text">
-                <string>Set Pick Up
-Location</string>
-               </property>
-               <property name="icon">
-                <iconset resource="Icons.qrc">
-                 <normaloff>:/new/Icons/icons8-sledgehammer-100.png</normaloff>:/new/Icons/icons8-sledgehammer-100.png</iconset>
-               </property>
-               <property name="iconSize">
-                <size>
-                 <width>30</width>
-                 <height>30</height>
-                </size>
-               </property>
-              </widget>
-             </item>
             </layout>
            </item>
            <item>
@@ -428,7 +399,7 @@ Location</string>
               </widget>
              </item>
              <item>
-              <widget class="QComboBox" name="comboBox_2">
+              <widget class="QComboBox" name="incrementComboBox">
                <item>
                 <property name="text">
                  <string>0.1</string>
@@ -490,7 +461,7 @@ Location</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>716</width>
+     <width>1050</width>
      <height>22</height>
     </rect>
    </property>
@@ -516,9 +487,13 @@ Location</string>
    <addaction name="actionStart_Automated"/>
    <addaction name="actionStep_Through_Next"/>
    <addaction name="actionStep_Through_Back"/>
-   <addaction name="actionStop"/>
+   <addaction name="actionVacuum"/>
    <addaction name="separator"/>
    <addaction name="actionSettings"/>
+   <addaction name="actionHome_Machine"/>
+   <addaction name="separator"/>
+   <addaction name="actionSet_Pick_Up_Location"/>
+   <addaction name="actionSet_Place_Location"/>
   </widget>
   <action name="actionNew_Project">
    <property name="icon">
@@ -595,13 +570,52 @@ Location</string>
     <string>Settings</string>
    </property>
   </action>
-  <action name="actionStop">
+  <action name="actionVacuum">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="Icons.qrc">
-     <normaloff>:/new/Icons/icons8-manual-80.png</normaloff>:/new/Icons/icons8-manual-80.png</iconset>
+     <normaloff>:/new/Icons/icons8-vacuum-cleaner-80.png</normaloff>:/new/Icons/icons8-vacuum-cleaner-80.png</iconset>
    </property>
    <property name="text">
-    <string>Stop</string>
+    <string>Vacuum</string>
+   </property>
+   <property name="toolTip">
+    <string>VacuumOnOff</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+V</string>
+   </property>
+  </action>
+  <action name="actionHome_Machine">
+   <property name="icon">
+    <iconset resource="Icons.qrc">
+     <normaloff>:/new/Icons/icons8-home-address-100.png</normaloff>:/new/Icons/icons8-home-address-100.png</iconset>
+   </property>
+   <property name="text">
+    <string>Home Machine</string>
+   </property>
+   <property name="toolTip">
+    <string>Home X and Y axis of the Machine</string>
+   </property>
+  </action>
+  <action name="actionSet_Pick_Up_Location">
+   <property name="icon">
+    <iconset resource="Icons.qrc">
+     <normaloff>:/new/Icons/icons8-weightlifting-64.png</normaloff>:/new/Icons/icons8-weightlifting-64.png</iconset>
+   </property>
+   <property name="text">
+    <string>Set Pick Location</string>
+   </property>
+  </action>
+  <action name="actionSet_Place_Location">
+   <property name="icon">
+    <iconset resource="Icons.qrc">
+     <normaloff>:/new/Icons/icons8-american-football-player-64.png</normaloff>:/new/Icons/icons8-american-football-player-64.png</iconset>
+   </property>
+   <property name="text">
+    <string>Set Place Location</string>
    </property>
   </action>
  </widget>

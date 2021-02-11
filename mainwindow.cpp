@@ -6,14 +6,45 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    ui->statusbar->showMessage("Disconnected");
+    QSettings settings("Devesh Rai", "Easy Picker");
+    this->machineSerial=settings.value("settings/machineSerialName").toString();
+    this->vacuumSerial=settings.value("settings/vacuumSerialName").toString();
+    this->incrementAmount=settings.value("settings/incrementAmount").toString();
+    for(int i=0; i<ui->incrementComboBox->count();i++)
+    {
+        qDebug()<<ui->incrementComboBox->itemText((i));
+        if(ui->incrementComboBox->itemText(i)==this->incrementAmount)
+        {
+            qDebug()<<"Found "<<this->incrementAmount<<" at "<<i;
+            ui->incrementComboBox->setCurrentIndex(i);
+        }
+    }
+    if(this->machineSerial!=""&&this->vacuumSerial!="")
+    {
+        this->connectToSerial();
+        ui->statusbar->showMessage("Connected to Machine: "+this->machineSerial+". Conneted to Vacuum: "+this->vacuumSerial);
+    }
+    else
+        ui->statusbar->showMessage("Disconnected");
+    this->settingsDialog = new SettingsDialog();
 
     this->populateCameraList();
     this->findAndStartCamera();
 
 
-}
 
+}
+void MainWindow::connectToSerial()
+{
+    mcPort = new QSerialPort(this->machineSerial);
+    mcPort->setBaudRate(115200);
+    mcPort->open(QIODevice::ReadWrite);
+
+    vcPort = new QSerialPort(this->vacuumSerial);
+    vcPort->setBaudRate(115200);
+    vcPort->open(QIODevice::ReadWrite);
+
+}
 MainWindow::~MainWindow()
 {
     delete ui;
@@ -79,7 +110,7 @@ bool MainWindow::findAndStartCamera(void)
         camviewfinder = new QCameraViewfinder(ui->cameraView);
         camera->setViewfinder(camviewfinder);
         camviewfinder->show();
-        camviewfinder->setAspectRatioMode(Qt::KeepAspectRatioByExpanding);
+        camviewfinder->setAspectRatioMode(Qt::KeepAspectRatio);
         camviewfinder->setFixedSize(200,200);
         camera->start();
 
@@ -131,6 +162,7 @@ bool MainWindow::populateTableFromCSV(QString csvFileName)
 
     ui->tableWidget->setRowCount(csvRowCount);
     ui->tableWidget->setColumnCount(csvColCount);
+    qDebug()<<csvRowCount;
     ui->tableWidget->setHorizontalHeaderLabels(headerNames);
 
     for(int xCnt=0;xCnt<5;xCnt++)
@@ -165,10 +197,29 @@ bool MainWindow::populateTableFromCSV(QString csvFileName)
             }
         }
     }
+    this->changeTableToMM();
     ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     return true;
 }
 
+void MainWindow::changeTableToMM()
+{
+    //qDebug()<<ui->tableWidget->rowCount();
+    for(int xCnt=1;xCnt<3;xCnt++)
+    {
+        for(int yCnt=0;yCnt<ui->tableWidget->rowCount();yCnt++)
+        {
+            QString milStr,mmStr;
+            double milVal,mmVal;
+            milStr=ui->tableWidget->item(yCnt,xCnt)->text();
+            milVal=milStr.toDouble();
+            mmVal=milVal*0.0254;
+            mmStr=QString::number(mmVal,'g',3);
+            ui->tableWidget->setItem(yCnt,xCnt,new QTableWidgetItem(mmStr));
+            //qDebug()<<ui->tableWidget->item(yCnt,4)->text()<<milStr<<","<<milVal<<","<<mmVal<<","<<mmStr;
+        }
+    }
+}
 void MainWindow::on_actionImport_CSV_triggered()
 {
     QString csvFileName=QFileDialog::getOpenFileName(this, tr("Open file"), "~/Desktop", tr("CSV/mnt files (*.csv *.mnt)"));
@@ -196,12 +247,35 @@ void MainWindow::on_actionImport_CSV_triggered()
 
 void MainWindow::on_tableWidget_cellClicked(int row, int column)
 {
-//    QMessageBox mb;
-//    mb.setText(ui->tableWidget->item(row,column)->text()+" "+QString::number(row)+","+QString::number(column));
-//    mb.exec();
     ui->partNameLabel->setText(ui->tableWidget->item(row,4)->text());
     ui->pickUpLocationLabel->setText("("+ui->tableWidget->item(row,1)->text()+","+ui->tableWidget->item(row,2)->text()+",0)");
+    this->selectedRow=row;
+    this->selectedColumn=column;
+    if(ui->tableWidget->item(row,5)->text()=="")
+    {
 
+
+        QString mcCommand="G0 Z0 F3000\r\nG0 X"+ui->tableWidget->item(row,1)->text()+"Y"+ui->tableWidget->item(row,2)->text()+ "\r\nG0 Z17 F3000\r\n";
+        QByteArray qba=mcCommand.toUtf8();
+        mcPort->write(qba);
+        locX=ui->tableWidget->item(row,1)->text().toDouble();
+        locY=ui->tableWidget->item(row,2)->text().toDouble();
+        locZ=17;
+        this->updateCoordinates();
+    }
+    else
+    {
+        QString mcCommand="G0 Z0 F3000\r\nG0 X"+ui->tableWidget->item(row,5)->text()+"Y"
+                +ui->tableWidget->item(row,5)->text()
+                + "\r\nG0 Z"+ui->tableWidget->item(row,7)->text()
+                +" F3000\r\n";
+        QByteArray qba=mcCommand.toUtf8();
+        mcPort->write(qba);
+        locX=ui->tableWidget->item(row,5)->text().toDouble();
+        locY=ui->tableWidget->item(row,6)->text().toDouble();
+        locZ=ui->tableWidget->item(row,7)->text().toDouble();
+        this->updateCoordinates();
+    }
 }
 
 void MainWindow::on_tableWidget_cellActivated(int row, int column)
@@ -214,4 +288,116 @@ void MainWindow::on_tableWidget_cellActivated(int row, int column)
 void MainWindow::on_MainWindow_destroyed()
 {
 
+}
+
+void MainWindow::on_actionSet_Pick_Up_Location_triggered()
+{
+
+}
+
+void MainWindow::on_actionSettings_triggered()
+{
+    this->settingsDialog->exec();
+}
+
+void MainWindow::on_adjustTopPushButton_clicked()
+{
+    QString jogCommand="$J=G91 G21 Y"+this->incrementAmount+ " F1000\r\n";
+    QByteArray qba=jogCommand.toUtf8();
+    //qba.append('e');
+    mcPort->write(qba);
+    locY+=this->incrementAmount.toDouble();
+    this->updateCoordinates();
+}
+
+void MainWindow::on_adjustBottomPushButton_clicked()
+{
+    QString jogCommand="$J=G91 G21 Y-"+this->incrementAmount+ " F1000\r\n";
+    QByteArray qba=jogCommand.toUtf8();
+    //qba.append('e');
+    mcPort->write(qba);
+    locY-=this->incrementAmount.toDouble();
+    this->updateCoordinates();
+}
+
+void MainWindow::on_adjustLeftPushButton_clicked()
+{
+    QString jogCommand="$J=G91 G21 X-"+this->incrementAmount+ " F1000\r\n";
+    QByteArray qba=jogCommand.toUtf8();
+    //qba.append('e');
+    mcPort->write(qba);
+    locX-=this->incrementAmount.toDouble();
+    this->updateCoordinates();
+}
+
+void MainWindow::on_adjustRightPushButton_clicked()
+{
+    QString jogCommand="$J=G91 G21 X" +this->incrementAmount+ " F1000\r\n";
+    //qDebug()<<jogCommand;
+    QByteArray qba=jogCommand.toUtf8();
+    //qba.append('e');
+    mcPort->write(qba);
+    locX+=this->incrementAmount.toDouble();
+    this->updateCoordinates();
+}
+
+void MainWindow::on_incrementComboBox_currentIndexChanged(const QString &arg1)
+{
+    QSettings settings("Devesh Rai", "Easy Picker");
+    settings.setValue("settings/incrementAmount",arg1);
+    this->incrementAmount=arg1;
+    qDebug()<<this->incrementAmount;
+}
+
+void MainWindow::on_pushButton_3_clicked()
+{
+    QString jogCommand="$J=G91 G21 Z-" +this->incrementAmount+ " F1000\r\n";
+    //qDebug()<<jogCommand;
+    QByteArray qba=jogCommand.toUtf8();
+    //qba.append('e');
+    mcPort->write(qba);
+    locZ-=this->incrementAmount.toDouble();
+    this->updateCoordinates();
+}
+
+void MainWindow::on_pushButton_4_clicked()
+{
+    QString jogCommand="$J=G91 G21 Z" +this->incrementAmount+ " F1000\r\n";
+    //qDebug()<<jogCommand;
+    QByteArray qba=jogCommand.toUtf8();
+    //qba.append('e');
+    mcPort->write(qba);
+    locZ+=this->incrementAmount.toDouble();
+    this->updateCoordinates();
+}
+void MainWindow::updateCoordinates(void)
+{
+    QString newHeadLocation="("+QString::number(locX)+", "+QString::number(locY)+", "+QString::number(locZ)+")";
+    ui->headLocationLabel->setText(newHeadLocation);
+}
+
+void MainWindow::on_actionVacuum_toggled(bool arg1)
+{
+    if(arg1)
+    {
+        QByteArray qba;
+        qba.append('e');
+        vcPort->write(qba);
+    }
+    else
+    {
+        QByteArray qba;
+        qba.append('d');
+        vcPort->write(qba);
+    }
+}
+
+void MainWindow::on_actionHome_Machine_triggered()
+{
+    QString homeCommand="G0 X0 Y0 Z0\r\n";
+    //qDebug()<<jogCommand;
+    QByteArray qba=homeCommand.toUtf8();
+    mcPort->write(qba);
+    locX=0;locY=0;locZ=0;
+    this->updateCoordinates();
 }
