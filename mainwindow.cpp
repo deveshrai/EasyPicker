@@ -22,7 +22,7 @@ MainWindow::MainWindow(QWidget *parent)
     if(this->machineSerial!=""&&this->vacuumSerial!="")
     {
         this->connectToSerial();
-        ui->statusbar->showMessage("Connected to Machine: "+this->machineSerial+". Conneted to Vacuum: "+this->vacuumSerial);
+        ui->statusbar->showMessage("Connected to Machine: "+this->machineSerial+". Connected to Vacuum: "+this->vacuumSerial);
     }
     else
         ui->statusbar->showMessage("Disconnected");
@@ -197,6 +197,14 @@ bool MainWindow::populateTableFromCSV(QString csvFileName)
             }
         }
     }
+    for(int xCnt=5;xCnt<11;xCnt++)
+    {
+        for(int yCnt=0;yCnt<csvRowCount;yCnt++)
+        {
+            ui->tableWidget->setItem(yCnt,xCnt,new QTableWidgetItem("-0"));
+        }
+    }
+    //ui->tableWidget->item(row,5)->
     this->changeTableToMM();
     ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     return true;
@@ -251,7 +259,8 @@ void MainWindow::on_tableWidget_cellClicked(int row, int column)
     ui->pickUpLocationLabel->setText("("+ui->tableWidget->item(row,1)->text()+","+ui->tableWidget->item(row,2)->text()+",0)");
     this->selectedRow=row;
     this->selectedColumn=column;
-    if(ui->tableWidget->item(row,5)->text()=="")
+
+    if(ui->tableWidget->item(row,5)->text()=="-0")
     {
 
 

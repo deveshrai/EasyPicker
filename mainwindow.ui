@@ -481,6 +481,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionNew_Project"/>
+   <addaction name="actionSave"/>
    <addaction name="actionOpen"/>
    <addaction name="actionImport_CSV"/>
    <addaction name="separator"/>
@@ -616,6 +617,18 @@
    </property>
    <property name="text">
     <string>Set Place Location</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="icon">
+    <iconset resource="Icons.qrc">
+     <normaloff>:/new/Icons/icons8-money-box-80.png</normaloff>:/new/Icons/icons8-money-box-80.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save</string>
+   </property>
+   <property name="toolTip">
+    <string>Save Project</string>
    </property>
   </action>
  </widget>
