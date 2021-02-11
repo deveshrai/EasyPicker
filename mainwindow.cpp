@@ -410,3 +410,8 @@ void MainWindow::on_actionHome_Machine_triggered()
     locX=0;locY=0;locZ=0;
     this->updateCoordinates();
 }
+
+void MainWindow::on_actionSave_triggered()
+{
+
+}
