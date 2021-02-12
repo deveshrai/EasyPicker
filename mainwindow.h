@@ -67,6 +67,8 @@ private slots:
 
     void on_actionHome_Machine_triggered();
 
+    void on_actionSave_triggered();
+
 private:
     bool populateTableFromCSV(QString csvFileName);
     void changeTableToMM();

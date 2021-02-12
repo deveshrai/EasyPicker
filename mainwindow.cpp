@@ -12,10 +12,10 @@ MainWindow::MainWindow(QWidget *parent)
     this->incrementAmount=settings.value("settings/incrementAmount").toString();
     for(int i=0; i<ui->incrementComboBox->count();i++)
     {
-        qDebug()<<ui->incrementComboBox->itemText((i));
+        //qDebug()<<ui->incrementComboBox->itemText((i));
         if(ui->incrementComboBox->itemText(i)==this->incrementAmount)
         {
-            qDebug()<<"Found "<<this->incrementAmount<<" at "<<i;
+            //qDebug()<<"Found "<<this->incrementAmount<<" at "<<i;
             ui->incrementComboBox->setCurrentIndex(i);
         }
     }
@@ -197,7 +197,7 @@ bool MainWindow::populateTableFromCSV(QString csvFileName)
             }
         }
     }
-    for(int xCnt=5;xCnt<11;xCnt++)
+    for(int xCnt=5;xCnt<12;xCnt++)
     {
         for(int yCnt=0;yCnt<csvRowCount;yCnt++)
         {
@@ -413,5 +413,38 @@ void MainWindow::on_actionHome_Machine_triggered()
 
 void MainWindow::on_actionSave_triggered()
 {
+    //Save .pup file
+    QString fileName=QFileDialog::getSaveFileName(this,"Save Pick And Place File","","Pick Und Place File (*.pup)");
+    qDebug()<<fileName;
+
+    if(fileName!="")
+    {
+        QFile file(fileName);
+        if (!file.open(QIODevice::WriteOnly))
+        {
+            QMessageBox::information(this, tr("Unable to open file"),
+            file.errorString());
+            return;
+        }
+
+
+        QString fileData="";
+        qDebug()<<ui->tableWidget->rowCount()<<" "<<ui->tableWidget->columnCount();
+        for(int row=0; row<ui->tableWidget->rowCount();row++)
+        {
+            for(int column=0; column<ui->tableWidget->columnCount();column++)
+            {
+                fileData=fileData+ui->tableWidget->item(row,column)->text()+((column+1)==ui->tableWidget->columnCount()?"":";");
+
+            }
+            fileData+="\n";
+        }
+        file.write(fileData.toUtf8());
+        file.close();
+        ui->statusbar->showMessage(fileName+" written!");
+
+    }
 
 }
+
+
