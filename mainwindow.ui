@@ -487,12 +487,12 @@
    <addaction name="separator"/>
    <addaction name="actionStart_Automated"/>
    <addaction name="actionStep_Through_Next"/>
-   <addaction name="actionStep_Through_Back"/>
    <addaction name="actionVacuum"/>
    <addaction name="separator"/>
    <addaction name="actionSettings"/>
    <addaction name="actionHome_Machine"/>
    <addaction name="separator"/>
+   <addaction name="actionCamera_Coordinates"/>
    <addaction name="actionSet_Pick_Up_Location"/>
    <addaction name="actionSet_Place_Location"/>
   </widget>
@@ -550,7 +550,7 @@
      <normaloff>:/new/Icons/icons8-obstruction-lights-on-80.png</normaloff>:/new/Icons/icons8-obstruction-lights-on-80.png</iconset>
    </property>
    <property name="text">
-    <string>Step Through Next</string>
+    <string>Step Through</string>
    </property>
   </action>
   <action name="actionStep_Through_Back">
@@ -629,6 +629,18 @@
    </property>
    <property name="toolTip">
     <string>Save Project</string>
+   </property>
+  </action>
+  <action name="actionCamera_Coordinates">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="Icons.qrc">
+     <normaloff>:/new/Icons/icons8-coordinate-system-80.png</normaloff>:/new/Icons/icons8-coordinate-system-80.png</iconset>
+   </property>
+   <property name="text">
+    <string>Camera/Coordinates</string>
    </property>
   </action>
  </widget>

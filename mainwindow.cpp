@@ -209,6 +209,85 @@ bool MainWindow::populateTableFromCSV(QString csvFileName)
     ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     return true;
 }
+bool MainWindow::populateTableFromPUP(QString pupFileName)
+{
+    QList<QString> pupLines;
+    QList<QStringList> pupContent;
+    QStringList headerNames={"Part Value","X","Y","Rotation","Part Name","Pick up X", "Pick up Y", "Pick up Z", "Place X", "Place Y", "Place Z", "Enabled"};
+    QFile file(pupFileName);
+    QTableWidgetItem *Capacitor=new QTableWidgetItem("Capacitor");
+    Capacitor->setIcon(QIcon(QPixmap(":/new/Icons/icons8-capacitor-80.png")));
+    QTableWidgetItem *Resistor=new QTableWidgetItem("Resistor");
+    Resistor->setIcon(QIcon(QPixmap(":/new/Icons/icons8-resistor-80.png")));
+    QTableWidgetItem *Connector=new QTableWidgetItem("Connector");
+    Connector->setIcon(QIcon(QPixmap(":/new/Icons/icons8-usb-micro-a-80.png")));
+    QTableWidgetItem *Inductor=new QTableWidgetItem("Inductor");
+    Inductor->setIcon(QIcon(QPixmap(":/new/Icons/icons8-oscillator-80.png")));
+    QTableWidgetItem *Diode=new QTableWidgetItem("Diode");
+    Diode->setIcon(QIcon(QPixmap(":/new/Icons/icons8-led-diode-80.png")));
+    QTableWidgetItem *IC=new QTableWidgetItem("IC");
+    IC->setIcon(QIcon(QPixmap(":/new/Icons/icons8-processor-80.png")));
+    QTableWidgetItem *UnknownPart=new QTableWidgetItem("Unknown Part");
+    UnknownPart->setIcon(QIcon(QPixmap(":/new/Icons/icons8-question-mark-96.png")));
+
+
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+                    return false;
+
+    QTextStream in(&file);
+    while (!in.atEnd()) {
+        pupLines.append(in.readLine());
+    }
+
+
+    foreach(QString pupLine, pupLines)
+    {
+        pupContent.append(pupLine.split(";"));
+    }
+
+    int pupRowCount=pupLines.size();
+    int pupColCount=headerNames.size();//csvContent[0].size();
+
+    ui->tableWidget->setRowCount(pupRowCount);
+    ui->tableWidget->setColumnCount(pupColCount);
+    qDebug()<<pupRowCount;
+    ui->tableWidget->setHorizontalHeaderLabels(headerNames);
+
+    for(int xCnt=0;xCnt<12;xCnt++)
+    {
+        for(int yCnt=0;yCnt<pupRowCount;yCnt++)
+        {
+            ui->tableWidget->setItem(yCnt,xCnt,new QTableWidgetItem(pupContent[yCnt][xCnt]));
+            if(xCnt==4)
+            {
+                QString val=pupContent[yCnt][xCnt];
+                if(val.contains("U"))
+                    ui->tableWidget->setVerticalHeaderItem(yCnt,IC);
+                else if(val.contains("IC"))
+                    ui->tableWidget->setVerticalHeaderItem(yCnt,IC);
+                else if(val.contains("D"))
+                    ui->tableWidget->setVerticalHeaderItem(yCnt,Diode);
+                else if(val.contains("LED"))
+                    ui->tableWidget->setVerticalHeaderItem(yCnt,Diode);
+                else if(val.contains("J"))
+                    ui->tableWidget->setVerticalHeaderItem(yCnt,Connector);
+                else if(val.contains("R"))
+                    ui->tableWidget->setVerticalHeaderItem(yCnt,Resistor);
+                else if(val.contains("C"))
+                    ui->tableWidget->setVerticalHeaderItem(yCnt,Capacitor);
+                else if(val.contains("Y"))
+                    ui->tableWidget->setVerticalHeaderItem(yCnt,Inductor);
+                else if(val.contains("L"))
+                    ui->tableWidget->setVerticalHeaderItem(yCnt,Inductor);
+                else
+                    ui->tableWidget->setVerticalHeaderItem(yCnt,UnknownPart);
+
+            }
+        }
+    }
+    ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    return true;
+}
 
 void MainWindow::changeTableToMM()
 {
@@ -252,6 +331,44 @@ void MainWindow::on_actionImport_CSV_triggered()
     }
 
 }
+void MainWindow::on_actionOpen_triggered()
+{
+    QString fileName=QFileDialog::getOpenFileName(this, tr("Open file"), "", tr("Pick Und Place files (*.pup)"));
+
+
+    if(fileName!="")
+    {
+        if(populateTableFromPUP(fileName))
+            ui->statusbar->showMessage(fileName+" Opened",5000);
+        else
+        {
+            QMessageBox errorMessage;
+            errorMessage.setText("An error occured reading the file!");
+            errorMessage.exec();
+        }
+    }
+    else
+    {
+        QMessageBox errorMessage;
+        errorMessage.setText("No file selected.");
+        errorMessage.exec();
+    }
+}
+void MainWindow::on_actionSet_Pick_Up_Location_triggered()
+{
+
+
+    ui->tableWidget->item(this->selectedRow,5)->setText(QString::number(this->locX));
+    ui->tableWidget->item(this->selectedRow,6)->setText(QString::number(this->locY));
+    ui->tableWidget->item(this->selectedRow,7)->setText(QString::number(this->locZ));
+}
+
+void MainWindow::on_actionSet_Place_Location_triggered()
+{
+    ui->tableWidget->item(this->selectedRow,8)->setText(QString::number(this->locX));
+    ui->tableWidget->item(this->selectedRow,9)->setText(QString::number(this->locY));
+    ui->tableWidget->item(this->selectedRow,10)->setText(QString::number(this->locZ));
+}
 
 void MainWindow::on_tableWidget_cellClicked(int row, int column)
 {
@@ -259,31 +376,76 @@ void MainWindow::on_tableWidget_cellClicked(int row, int column)
     ui->pickUpLocationLabel->setText("("+ui->tableWidget->item(row,1)->text()+","+ui->tableWidget->item(row,2)->text()+",0)");
     this->selectedRow=row;
     this->selectedColumn=column;
-
-    if(ui->tableWidget->item(row,5)->text()=="-0")
+    if(column<5)
     {
+//        if(ui->tableWidget->item(row,5)->text()=="-0")
+//        {
 
 
-        QString mcCommand="G0 Z0 F3000\r\nG0 X"+ui->tableWidget->item(row,1)->text()+"Y"+ui->tableWidget->item(row,2)->text()+ "\r\nG0 Z17 F3000\r\n";
-        QByteArray qba=mcCommand.toUtf8();
-        mcPort->write(qba);
-        locX=ui->tableWidget->item(row,1)->text().toDouble();
-        locY=ui->tableWidget->item(row,2)->text().toDouble();
-        locZ=17;
-        this->updateCoordinates();
+//            QString mcCommand="G0 Z0 F3000\r\nG0 X"+ui->tableWidget->item(row,1)->text()+"Y"+ui->tableWidget->item(row,2)->text()+ "\r\nG0 Z17 F3000\r\n";
+//            QByteArray qba=mcCommand.toUtf8();
+//            mcPort->write(qba);
+//            locX=ui->tableWidget->item(row,1)->text().toDouble();
+//            locY=ui->tableWidget->item(row,2)->text().toDouble();
+//            locZ=17;
+//            this->updateCoordinates();
+        //this->moveTo(locX,locY,0);
+        qDebug()<<ui->tableWidget->item(row,1)->text().toDouble();
+        this->moveTo(ui->tableWidget->item(row,1)->text().toDouble() -(this->cameraMode==true?this->cameraOffsetX:0),
+                     ui->tableWidget->item(row,2)->text().toDouble() -(this->cameraMode==true?this->cameraOffsetY:0),
+                     17);
+        //this->jogTo(0,0,17);
+//        }
+//        else
+//        {
+//            QString mcCommand="G0 Z0 F3000\r\nG0 X"+ui->tableWidget->item(row,5)->text()+"Y"
+//                    +ui->tableWidget->item(row,6)->text()
+//                    + "\r\nG0 Z"+ui->tableWidget->item(row,7)->text()
+//                    +" F3000\r\n";
+//            QByteArray qba=mcCommand.toUtf8();
+//            mcPort->write(qba);
+//            locX=ui->tableWidget->item(row,5)->text().toDouble();
+//            locY=ui->tableWidget->item(row,6)->text().toDouble();
+//            locZ=ui->tableWidget->item(row,7)->text().toDouble();
+//            this->updateCoordinates();
+//        }
     }
-    else
+    else if(column>=5&&column<=7&&ui->tableWidget->item(row,5)->text()!="-0")
     {
-        QString mcCommand="G0 Z0 F3000\r\nG0 X"+ui->tableWidget->item(row,5)->text()+"Y"
-                +ui->tableWidget->item(row,5)->text()
-                + "\r\nG0 Z"+ui->tableWidget->item(row,7)->text()
-                +" F3000\r\n";
-        QByteArray qba=mcCommand.toUtf8();
-        mcPort->write(qba);
-        locX=ui->tableWidget->item(row,5)->text().toDouble();
-        locY=ui->tableWidget->item(row,6)->text().toDouble();
-        locZ=ui->tableWidget->item(row,7)->text().toDouble();
-        this->updateCoordinates();
+        //this->moveTo(locX,locY,0);
+        this->moveTo(ui->tableWidget->item(row,5)->text().toDouble() -(this->cameraMode==true?cameraOffsetX:0),
+                     ui->tableWidget->item(row,6)->text().toDouble() -(this->cameraMode==true?cameraOffsetY:0),
+                     17);
+        //this->jogTo(0,0,ui->tableWidget->item(row,7)->text().toDouble());
+//        QString mcCommand="G0 Z0 F3000\r\nG0 X"+ui->tableWidget->item(row,5)->text()+"Y"
+//                +ui->tableWidget->item(row,6)->text()
+//                + "\r\nG0 Z"+ui->tableWidget->item(row,7)->text()
+//                +" F3000\r\n";
+//        QByteArray qba=mcCommand.toUtf8();
+//        mcPort->write(qba);
+//        locX=ui->tableWidget->item(row,5)->text().toDouble();
+//        locY=ui->tableWidget->item(row,6)->text().toDouble();
+//        locZ=ui->tableWidget->item(row,7)->text().toDouble();
+//        this->updateCoordinates();
+    }
+    else if(column>=8&&column<=10&&ui->tableWidget->item(row,8)->text()!="-0")
+    {
+        //this->moveTo(locX,locY,0);
+        this->moveTo(ui->tableWidget->item(row,8)->text().toDouble() -(this->cameraMode==true?cameraOffsetX:0),
+                     ui->tableWidget->item(row,9)->text().toDouble() -(this->cameraMode==true?cameraOffsetY:0),
+                     17);
+        //this->jogTo(0,0,ui->tableWidget->item(row,10)->text().toDouble());
+
+//        QString mcCommand="G0 Z0 F3000\r\nG0 X"+ui->tableWidget->item(row,8)->text()+"Y"
+//                +ui->tableWidget->item(row,9)->text()
+//                + "\r\nG0 Z"+ui->tableWidget->item(row,10)->text()
+//                +" F3000\r\n";
+//        QByteArray qba=mcCommand.toUtf8();
+//        mcPort->write(qba);
+//        locX=ui->tableWidget->item(row,8)->text().toDouble();
+//        locY=ui->tableWidget->item(row,9)->text().toDouble();
+//        locZ=ui->tableWidget->item(row,10)->text().toDouble();
+//        this->updateCoordinates();
     }
 }
 
@@ -299,55 +461,82 @@ void MainWindow::on_MainWindow_destroyed()
 
 }
 
-void MainWindow::on_actionSet_Pick_Up_Location_triggered()
-{
 
-}
 
 void MainWindow::on_actionSettings_triggered()
 {
     this->settingsDialog->exec();
 }
-
-void MainWindow::on_adjustTopPushButton_clicked()
+void MainWindow::moveTo(double x, double y, double z)
 {
-    QString jogCommand="$J=G91 G21 Y"+this->incrementAmount+ " F1000\r\n";
+    qDebug()<<x<<" "<<y<<" "<<z;
+    QString jogCommand="G0 X"+QString::number(x)+"Y"+QString::number(y)+"Z"+QString::number(z)+ "\r\n";
     QByteArray qba=jogCommand.toUtf8();
     //qba.append('e');
     mcPort->write(qba);
-    locY+=this->incrementAmount.toDouble();
+    locX=x;
+    locY=y;
+    locZ=z;
+
     this->updateCoordinates();
+}
+void MainWindow::jogTo(double x, double y, double z)
+{
+    QString jogCommand="$J=G91 G21 X"+QString::number(x)+"Y"+QString::number(y)+"Z"+QString::number(z)+ " F1000\r\n";
+    QByteArray qba=jogCommand.toUtf8();
+    //qba.append('e');
+    mcPort->write(qba);
+    locX+=x;
+    locY+=x;
+    locZ+=x;
+
+    this->updateCoordinates();
+}
+
+void MainWindow::on_adjustTopPushButton_clicked()
+{
+//    QString jogCommand="$J=G91 G21 Y"+this->incrementAmount+ " F1000\r\n";
+//    QByteArray qba=jogCommand.toUtf8();
+//    //qba.append('e');
+//    mcPort->write(qba);
+//    locY+=this->incrementAmount.toDouble();
+//    this->updateCoordinates();
+    this->jogTo(0,this->incrementAmount.toDouble(),0);
 }
 
 void MainWindow::on_adjustBottomPushButton_clicked()
 {
-    QString jogCommand="$J=G91 G21 Y-"+this->incrementAmount+ " F1000\r\n";
-    QByteArray qba=jogCommand.toUtf8();
-    //qba.append('e');
-    mcPort->write(qba);
-    locY-=this->incrementAmount.toDouble();
-    this->updateCoordinates();
+//    QString jogCommand="$J=G91 G21 Y-"+this->incrementAmount+ " F1000\r\n";
+//    QByteArray qba=jogCommand.toUtf8();
+//    //qba.append('e');
+//    mcPort->write(qba);
+//    locY-=this->incrementAmount.toDouble();
+//    this->updateCoordinates();
+        this->jogTo(0,0-(this->incrementAmount.toDouble()),0);
 }
+
 
 void MainWindow::on_adjustLeftPushButton_clicked()
 {
-    QString jogCommand="$J=G91 G21 X-"+this->incrementAmount+ " F1000\r\n";
-    QByteArray qba=jogCommand.toUtf8();
-    //qba.append('e');
-    mcPort->write(qba);
-    locX-=this->incrementAmount.toDouble();
-    this->updateCoordinates();
+//    QString jogCommand="$J=G91 G21 X-"+this->incrementAmount+ " F1000\r\n";
+//    QByteArray qba=jogCommand.toUtf8();
+//    //qba.append('e');
+//    mcPort->write(qba);
+//    locX-=this->incrementAmount.toDouble();
+//    this->updateCoordinates();
+        this->jogTo((0-this->incrementAmount.toDouble()),0,0);
 }
 
 void MainWindow::on_adjustRightPushButton_clicked()
 {
-    QString jogCommand="$J=G91 G21 X" +this->incrementAmount+ " F1000\r\n";
-    //qDebug()<<jogCommand;
-    QByteArray qba=jogCommand.toUtf8();
-    //qba.append('e');
-    mcPort->write(qba);
-    locX+=this->incrementAmount.toDouble();
-    this->updateCoordinates();
+//    QString jogCommand="$J=G91 G21 X" +this->incrementAmount+ " F1000\r\n";
+//    //qDebug()<<jogCommand;
+//    QByteArray qba=jogCommand.toUtf8();
+//    //qba.append('e');
+//    mcPort->write(qba);
+//    locX+=this->incrementAmount.toDouble();
+//    this->updateCoordinates();
+    this->jogTo((this->incrementAmount.toDouble()),0,0);
 }
 
 void MainWindow::on_incrementComboBox_currentIndexChanged(const QString &arg1)
@@ -360,24 +549,26 @@ void MainWindow::on_incrementComboBox_currentIndexChanged(const QString &arg1)
 
 void MainWindow::on_pushButton_3_clicked()
 {
-    QString jogCommand="$J=G91 G21 Z-" +this->incrementAmount+ " F1000\r\n";
-    //qDebug()<<jogCommand;
-    QByteArray qba=jogCommand.toUtf8();
-    //qba.append('e');
-    mcPort->write(qba);
-    locZ-=this->incrementAmount.toDouble();
-    this->updateCoordinates();
+//    QString jogCommand="$J=G91 G21 Z-" +this->incrementAmount+ " F1000\r\n";
+//    //qDebug()<<jogCommand;
+//    QByteArray qba=jogCommand.toUtf8();
+//    //qba.append('e');
+//    mcPort->write(qba);
+//    locZ-=this->incrementAmount.toDouble();
+//    this->updateCoordinates();
+    this->jogTo(0,0,(0-this->incrementAmount.toDouble()));
 }
 
 void MainWindow::on_pushButton_4_clicked()
 {
-    QString jogCommand="$J=G91 G21 Z" +this->incrementAmount+ " F1000\r\n";
-    //qDebug()<<jogCommand;
-    QByteArray qba=jogCommand.toUtf8();
-    //qba.append('e');
-    mcPort->write(qba);
-    locZ+=this->incrementAmount.toDouble();
-    this->updateCoordinates();
+//    QString jogCommand="$J=G91 G21 Z" +this->incrementAmount+ " F1000\r\n";
+//    //qDebug()<<jogCommand;
+//    QByteArray qba=jogCommand.toUtf8();
+//    //qba.append('e');
+//    mcPort->write(qba);
+//    locZ+=this->incrementAmount.toDouble();
+//    this->updateCoordinates();
+    this->jogTo(0,0,(this->incrementAmount.toDouble()));
 }
 void MainWindow::updateCoordinates(void)
 {
@@ -403,7 +594,7 @@ void MainWindow::on_actionVacuum_toggled(bool arg1)
 
 void MainWindow::on_actionHome_Machine_triggered()
 {
-    QString homeCommand="G0 X0 Y0 Z0\r\n";
+    QString homeCommand="G0 Z0\r\nG0 X0 Y0 Z0\r\n";
     //qDebug()<<jogCommand;
     QByteArray qba=homeCommand.toUtf8();
     mcPort->write(qba);
@@ -448,3 +639,67 @@ void MainWindow::on_actionSave_triggered()
 }
 
 
+
+void MainWindow::on_actionNew_Project_triggered()
+{
+//    //for(int i=0;i<ui->tableWidget->rowCount();i++)
+//       //ui->tableWidget->removeRow(0);
+//    ui->tableWidget->model()->removeRows(0,ui->tableWidget->rowCount());
+}
+
+
+
+
+void MainWindow::on_actionCamera_Coordinates_triggered()
+{
+    //Camera is 10.7mm offset on X (10.687)
+}
+
+void MainWindow::on_actionCamera_Coordinates_toggled(bool arg1)
+{
+
+
+}
+
+void MainWindow::on_actionCamera_Coordinates_triggered(bool checked)
+{
+
+    //Camera is 10.7mm offset on X (10.687)
+    if(checked==true)
+    {
+        cameraMode=true;
+//        QString jogCommand="$J=G91 G21 X-14.7 Y-1.5 F1000\r\n";
+//        //qDebug()<<jogCommand;
+//        QByteArray qba=jogCommand.toUtf8();
+//        //qba.append('e');
+//        mcPort->write(qba);
+//        locX-=14.7;
+//        this->updateCoordinates();
+        jogTo(0-this->cameraOffsetX,0-this->cameraOffsetY,0);
+        ui->actionHome_Machine->setDisabled(true);
+        ui->actionSet_Pick_Up_Location->setDisabled(true);
+        ui->actionSet_Place_Location->setDisabled(true);
+        ui->actionStart_Automated->setDisabled(true);
+        ui->actionStep_Through_Next->setDisabled(true);
+        ui->actionVacuum->setDisabled(true);
+
+    }
+    else
+    {
+        cameraMode=false;
+//        QString jogCommand="$J=G91 G21 X14.7 Y1.5 F1000\r\n";
+//        //qDebug()<<jogCommand;
+//        QByteArray qba=jogCommand.toUtf8();
+//        //qba.append('e');
+//        mcPort->write(qba);
+//        locX+=14.7;
+//        this->updateCoordinates();
+        jogTo(this->cameraOffsetX,this->cameraOffsetY,0);
+        ui->actionHome_Machine->setDisabled(false);
+        ui->actionSet_Pick_Up_Location->setDisabled(false);
+        ui->actionSet_Place_Location->setDisabled(false);
+        ui->actionStart_Automated->setDisabled(false);
+        ui->actionStep_Through_Next->setDisabled(false);
+        ui->actionVacuum->setDisabled(false);
+    }
+}

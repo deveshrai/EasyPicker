@@ -1,5 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
+#define CAMERA_OFFSETX_VALUE 14.7
+#define CAMERA_OFFSETY_VALUE 1.5
 
 #include <QMainWindow>
 #include <QHeaderView>
@@ -69,13 +71,29 @@ private slots:
 
     void on_actionSave_triggered();
 
+    void on_actionNew_Project_triggered();
+
+    void on_actionOpen_triggered();
+
+    void on_actionSet_Place_Location_triggered();
+
+    void on_actionCamera_Coordinates_triggered();
+
+    void on_actionCamera_Coordinates_toggled(bool arg1);
+
+    void on_actionCamera_Coordinates_triggered(bool checked);
+
 private:
     bool populateTableFromCSV(QString csvFileName);
+    bool populateTableFromPUP(QString pupFileName);
     void changeTableToMM();
     void connectToSerial();
     void populateCameraList(void);
     bool findAndStartCamera(void);
     void updateCoordinates(void);
+    void moveTo(double x, double y, double z);
+    void jogTo(double x, double y, double z);
+
     Ui::MainWindow *ui;
     QString CSV_file_Data;
     QCamera *camera=nullptr;
@@ -89,6 +107,12 @@ private:
     QSerialPort *mcPort,*vcPort;
     double locX=0,locY=0,locZ=0;
     int selectedRow=0,selectedColumn=0;
+    bool cameraMode=false;
+    double cameraOffsetX=CAMERA_OFFSETX_VALUE;
+    double cameraOffsetY=CAMERA_OFFSETY_VALUE;
+
 
 };
+
+
 #endif // MAINWINDOW_H
