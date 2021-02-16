@@ -14,7 +14,9 @@
 #include <QIcon>
 #include <QPixmap>
 #include <QPainter>
+#include <QBrush>
 #include <QRgb>
+#include <QGraphicsView>
 #include <QCamera>
 #include <QCameraInfo>
 #include <QMultimedia>
@@ -82,6 +84,8 @@ private slots:
     void on_actionCamera_Coordinates_toggled(bool arg1);
 
     void on_actionCamera_Coordinates_triggered(bool checked);
+
+    void on_actionExit_triggered();
 
 private:
     bool populateTableFromCSV(QString csvFileName);

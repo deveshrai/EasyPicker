@@ -288,7 +288,7 @@
                    </size>
                   </property>
                   <property name="shortcut">
-                   <string>Shift+Num+Up</string>
+                   <string>Shift+Up</string>
                   </property>
                   <property name="flat">
                    <bool>true</bool>
@@ -323,7 +323,7 @@
                    </size>
                   </property>
                   <property name="shortcut">
-                   <string>Shift+Num+Down</string>
+                   <string>Shift+Down</string>
                   </property>
                   <property name="flat">
                    <bool>true</bool>
@@ -462,7 +462,7 @@
      <x>0</x>
      <y>0</y>
      <width>1050</width>
-     <height>24</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -473,6 +473,7 @@
     <addaction name="actionOpen"/>
     <addaction name="actionImport_CSV"/>
     <addaction name="actionSave"/>
+    <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuRun">
     <property name="title">
@@ -688,6 +689,15 @@
    </property>
    <property name="text">
     <string>Camera/Coordinates</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="icon">
+    <iconset resource="Icons.qrc">
+     <normaloff>:/new/Icons/icons8-question-mark-96.png</normaloff>:/new/Icons/icons8-question-mark-96.png</iconset>
+   </property>
+   <property name="text">
+    <string>Exit</string>
    </property>
   </action>
  </widget>

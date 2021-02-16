@@ -6,6 +6,8 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    //this->showMaximized();
+    this->showFullScreen();
     QSettings settings("Devesh Rai", "Easy Picker");
     this->machineSerial=settings.value("settings/machineSerialName").toString();
     this->vacuumSerial=settings.value("settings/vacuumSerialName").toString();
@@ -89,23 +91,16 @@ bool MainWindow::findAndStartCamera(void)
     }
     if(cameraFound)
     {
-        if(this->overlayCross!=nullptr)
-            delete overlayCross;
 
-        this->overlayCross=new QLabel();
-        QPixmap pix(100,100);//(":/new/Icons/transparent100-100.png");
-        //pix->swap(QPixmap());
-        //pix->fill(QColor(255,255,255,255));
-        QPainter paint(&pix);
-        paint.fillRect(0,0,100,100,QBrush(QColor(255,255,255,0)));
-        paint.setPen(*(new QColor(Qt::green)));
-        paint.drawLine(0,50,100,50);
-        paint.drawLine(50,0,50,100);
-        overlayCross->setPixmap(pix);
+
+
+
+        ////////////////////////////
 
         ui->gridLayout->removeWidget(ui->cameraView);
         ui->gridLayout->addWidget(ui->cameraView,0,0,Qt::AlignHCenter|Qt::AlignVCenter);
-        ui->gridLayout->addWidget(this->overlayCross,0,0,Qt::AlignCenter);
+
+        ///////////////////////////
 
         camviewfinder = new QCameraViewfinder(ui->cameraView);
         camera->setViewfinder(camviewfinder);
@@ -114,9 +109,15 @@ bool MainWindow::findAndStartCamera(void)
         camviewfinder->setFixedSize(200,200);
         camera->start();
 
-        //delete camera;
-        //delete paint;
-        //delete pix;
+        /////////////////
+
+
+        //////////////////
+
+
+
+        //////////////////////////////////
+
     }
     return cameraFound;
 }
@@ -645,6 +646,23 @@ void MainWindow::on_actionNew_Project_triggered()
 //    //for(int i=0;i<ui->tableWidget->rowCount();i++)
 //       //ui->tableWidget->removeRow(0);
 //    ui->tableWidget->model()->removeRows(0,ui->tableWidget->rowCount());
+
+    //overlayCross->setStyleSheet("background-color: rgba(0,0,0,0%)");//setStyleSheet("background-color: none;");
+    if(this->overlayCross!=nullptr)
+        delete overlayCross;
+    this->overlayCross=new QLabel();
+
+    QPixmap pix(50,50);
+    //QPixmap pix(":/new/Icons/transparent100-100.png")
+    QPainter paint(&pix);
+
+    paint.setPen(*(new QColor(Qt::green)));
+    paint.drawLine(0,25,50,25);
+    paint.drawLine(25,0,25,50);
+    paint.end();
+
+    overlayCross->setPixmap(pix);
+    ui->gridLayout->addWidget(this->overlayCross,0,0,Qt::AlignCenter);
 }
 
 
@@ -702,4 +720,9 @@ void MainWindow::on_actionCamera_Coordinates_triggered(bool checked)
         ui->actionStep_Through_Next->setDisabled(false);
         ui->actionVacuum->setDisabled(false);
     }
+}
+
+void MainWindow::on_actionExit_triggered()
+{
+    QApplication::exit(0);
 }
