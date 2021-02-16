@@ -487,8 +487,8 @@ void MainWindow::jogTo(double x, double y, double z)
     //qba.append('e');
     mcPort->write(qba);
     locX+=x;
-    locY+=x;
-    locZ+=x;
+    locY+=y;
+    locZ+=z;
 
     this->updateCoordinates();
 }
