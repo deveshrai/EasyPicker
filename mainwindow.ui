@@ -462,9 +462,53 @@
      <x>0</x>
      <y>0</y>
      <width>1050</width>
-     <height>22</height>
+     <height>24</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionNew_Project"/>
+    <addaction name="actionOpen"/>
+    <addaction name="actionImport_CSV"/>
+    <addaction name="actionSave"/>
+   </widget>
+   <widget class="QMenu" name="menuRun">
+    <property name="title">
+     <string>Run</string>
+    </property>
+    <addaction name="actionStart_Automated"/>
+    <addaction name="actionStep_Through_Next"/>
+    <addaction name="actionStep_Through_Back"/>
+   </widget>
+   <widget class="QMenu" name="menuSettings">
+    <property name="title">
+     <string>Settings</string>
+    </property>
+    <addaction name="actionSettings"/>
+   </widget>
+   <widget class="QMenu" name="menuPrepare">
+    <property name="title">
+     <string>Prepare</string>
+    </property>
+    <addaction name="actionSet_Pick_Up_Location"/>
+    <addaction name="actionSet_Place_Location"/>
+    <addaction name="actionCamera_Coordinates"/>
+    <addaction name="actionVacuum"/>
+    <addaction name="actionHome_Machine"/>
+   </widget>
+   <widget class="QMenu" name="menuSettings_2">
+    <property name="title">
+     <string>Settings</string>
+    </property>
+    <addaction name="actionSettings"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuRun"/>
+   <addaction name="menuSettings"/>
+   <addaction name="menuPrepare"/>
+   <addaction name="menuSettings_2"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBar">
@@ -518,6 +562,9 @@
    </property>
    <property name="toolTip">
     <string>Open a project</string>
+   </property>
+   <property name="shortcut">
+    <string>Meta+O</string>
    </property>
   </action>
   <action name="actionImport_CSV">
@@ -637,7 +684,7 @@
    </property>
    <property name="icon">
     <iconset resource="Icons.qrc">
-     <normaloff>:/new/Icons/icons8-coordinate-system-80.png</normaloff>:/new/Icons/icons8-coordinate-system-80.png</iconset>
+     <normaloff>:/new/Icons/icons8-camera-automation-80.png</normaloff>:/new/Icons/icons8-camera-automation-80.png</iconset>
    </property>
    <property name="text">
     <string>Camera/Coordinates</string>
