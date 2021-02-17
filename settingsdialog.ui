@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>465</width>
-    <height>375</height>
+    <height>384</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -90,32 +90,65 @@
           </size>
          </property>
          <property name="title">
-          <string>Units</string>
+          <string>Camera Offset</string>
          </property>
-         <widget class="QRadioButton" name="radioButton">
+         <widget class="QLabel" name="label">
           <property name="geometry">
            <rect>
             <x>10</x>
             <y>20</y>
-            <width>131</width>
-            <height>20</height>
+            <width>21</width>
+            <height>16</height>
            </rect>
           </property>
           <property name="text">
-           <string>mils (Imperial)</string>
+           <string>X:</string>
           </property>
          </widget>
-         <widget class="QRadioButton" name="radioButton_2">
+         <widget class="QLabel" name="label_2">
           <property name="geometry">
            <rect>
             <x>10</x>
             <y>50</y>
-            <width>99</width>
-            <height>20</height>
+            <width>21</width>
+            <height>16</height>
            </rect>
           </property>
           <property name="text">
-           <string>mm (Metric)</string>
+           <string>Y:</string>
+          </property>
+         </widget>
+         <widget class="QLineEdit" name="xCameraOffsetLE">
+          <property name="geometry">
+           <rect>
+            <x>30</x>
+            <y>20</y>
+            <width>113</width>
+            <height>23</height>
+           </rect>
+          </property>
+         </widget>
+         <widget class="QLineEdit" name="yCameraOffsetLE">
+          <property name="geometry">
+           <rect>
+            <x>30</x>
+            <y>50</y>
+            <width>113</width>
+            <height>23</height>
+           </rect>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="pushButton_3">
+          <property name="geometry">
+           <rect>
+            <x>340</x>
+            <y>50</y>
+            <width>80</width>
+            <height>23</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Adjust</string>
           </property>
          </widget>
         </widget>

@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
-#define CAMERA_OFFSETX_VALUE 14.7
-#define CAMERA_OFFSETY_VALUE 1.5
+#define CAMERA_DEFAULT_OFFSETX_VALUE 14.7
+#define CAMERA_DEFAULT_OFFSETY_VALUE 1.5
 
 #include <QMainWindow>
 #include <QHeaderView>
@@ -12,15 +12,12 @@
 #include <QTextStream>
 #include <QMessageBox>
 #include <QIcon>
-#include <QPixmap>
-#include <QPainter>
-#include <QBrush>
-#include <QRgb>
-#include <QGraphicsView>
+#include <QGraphicsScene>
+#include <QGraphicsItem>
+#include <QGraphicsVideoItem>
 #include <QCamera>
 #include <QCameraInfo>
 #include <QMultimedia>
-#include <QCameraViewfinder>
 #include <QLabel>
 #include <QDebug>
 #include <QSettings>
@@ -39,6 +36,9 @@ public:
     ~MainWindow();
 
 private slots:
+
+    void updateSettings();
+
     void on_actionImport_CSV_triggered();
 
     void on_tableWidget_cellClicked(int row, int column);
@@ -95,6 +95,7 @@ private:
     void populateCameraList(void);
     bool findAndStartCamera(void);
     void updateCoordinates(void);
+    void updateCameraOffset(void);
     void moveTo(double x, double y, double z);
     void jogTo(double x, double y, double z);
 
@@ -102,7 +103,8 @@ private:
     QString CSV_file_Data;
     QCamera *camera=nullptr;
     bool cameraFound=false;
-    QCameraViewfinder *camviewfinder;
+    QGraphicsScene *camScene;
+    QGraphicsVideoItem *camVideoItem;
     QLabel *overlayCross=nullptr;
     SettingsDialog *settingsDialog;
     QString machineSerial;
@@ -112,8 +114,8 @@ private:
     double locX=0,locY=0,locZ=0;
     int selectedRow=0,selectedColumn=0;
     bool cameraMode=false;
-    double cameraOffsetX=CAMERA_OFFSETX_VALUE;
-    double cameraOffsetY=CAMERA_OFFSETY_VALUE;
+    double cameraOffsetX=CAMERA_DEFAULT_OFFSETX_VALUE;
+    double cameraOffsetY=CAMERA_DEFAULT_OFFSETY_VALUE;
 
 
 };

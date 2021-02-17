@@ -12,6 +12,9 @@ MainWindow::MainWindow(QWidget *parent)
     this->machineSerial=settings.value("settings/machineSerialName").toString();
     this->vacuumSerial=settings.value("settings/vacuumSerialName").toString();
     this->incrementAmount=settings.value("settings/incrementAmount").toString();
+    this->cameraOffsetX=settings.value("settings/xCameraOffset").toDouble();
+    this->cameraOffsetY=settings.value("settings/yCameraOffset").toDouble();
+
     for(int i=0; i<ui->incrementComboBox->count();i++)
     {
         //qDebug()<<ui->incrementComboBox->itemText((i));
@@ -29,13 +32,34 @@ MainWindow::MainWindow(QWidget *parent)
     else
         ui->statusbar->showMessage("Disconnected");
     this->settingsDialog = new SettingsDialog();
-
+    connect(settingsDialog,SIGNAL(accepted()),this,SLOT(updateSettings()));
+    this->camScene = new QGraphicsScene(this);
+    this->camVideoItem = new QGraphicsVideoItem();
     this->populateCameraList();
     this->findAndStartCamera();
 
 
 
 }
+void MainWindow::updateSettings()
+{
+    QSettings settings("Devesh Rai", "Easy Picker");
+    this->machineSerial=settings.value("settings/machineSerialName").toString();
+    this->vacuumSerial=settings.value("settings/vacuumSerialName").toString();
+    this->incrementAmount=settings.value("settings/incrementAmount").toString();
+    this->cameraOffsetX=settings.value("settings/xCameraOffset").toDouble();
+    this->cameraOffsetY=settings.value("settings/yCameraOffset").toDouble();
+//    mcPort->close();
+//    vcPort->close();
+
+//    this->connectToSerial();
+//    if(this->machineSerial!=""&&this->vacuumSerial!="")
+//    {
+//        this->connectToSerial();
+//        ui->statusbar->showMessage("Connected to Machine: "+this->machineSerial+". Connected to Vacuum: "+this->vacuumSerial);
+//    }
+}
+
 void MainWindow::connectToSerial()
 {
     mcPort = new QSerialPort(this->machineSerial);
@@ -83,8 +107,11 @@ bool MainWindow::findAndStartCamera(void)
         qDebug()<<cameraInfo.deviceName();
         if(cameraInfo.deviceName()==settings.value("settings/cameraName"))     //"EAB7A68FEC2B4487AADFD8A91C1CB782")
         {
-            if(camera!=nullptr)
+            if(camera !=nullptr)
+            {
+                camera->stop();
                 delete camera;
+            }
             camera = new QCamera(cameraInfo);
             cameraFound=true;
         }
@@ -92,31 +119,16 @@ bool MainWindow::findAndStartCamera(void)
     if(cameraFound)
     {
 
-
-
-
-        ////////////////////////////
-
         ui->gridLayout->removeWidget(ui->cameraView);
         ui->gridLayout->addWidget(ui->cameraView,0,0,Qt::AlignHCenter|Qt::AlignVCenter);
 
-        ///////////////////////////
-
-        camviewfinder = new QCameraViewfinder(ui->cameraView);
-        camera->setViewfinder(camviewfinder);
-        camviewfinder->show();
-        camviewfinder->setAspectRatioMode(Qt::KeepAspectRatio);
-        camviewfinder->setFixedSize(200,200);
+        camScene->addItem(camVideoItem);
+        camVideoItem->setSize(QSizeF(200,200));
+        camera->setViewfinder(camVideoItem);
+        ui->cameraView->setScene(camScene);
+        camScene->addLine(100,50,100,150,QPen(Qt::green));
+        camScene->addLine(50,100,150,100,QPen(Qt::green));
         camera->start();
-
-        /////////////////
-
-
-        //////////////////
-
-
-
-        //////////////////////////////////
 
     }
     return cameraFound;
@@ -379,74 +391,32 @@ void MainWindow::on_tableWidget_cellClicked(int row, int column)
     this->selectedColumn=column;
     if(column<5)
     {
-//        if(ui->tableWidget->item(row,5)->text()=="-0")
-//        {
 
-
-//            QString mcCommand="G0 Z0 F3000\r\nG0 X"+ui->tableWidget->item(row,1)->text()+"Y"+ui->tableWidget->item(row,2)->text()+ "\r\nG0 Z17 F3000\r\n";
-//            QByteArray qba=mcCommand.toUtf8();
-//            mcPort->write(qba);
-//            locX=ui->tableWidget->item(row,1)->text().toDouble();
-//            locY=ui->tableWidget->item(row,2)->text().toDouble();
-//            locZ=17;
-//            this->updateCoordinates();
-        //this->moveTo(locX,locY,0);
+        this->moveTo(locX,locY,0);
         qDebug()<<ui->tableWidget->item(row,1)->text().toDouble();
         this->moveTo(ui->tableWidget->item(row,1)->text().toDouble() -(this->cameraMode==true?this->cameraOffsetX:0),
                      ui->tableWidget->item(row,2)->text().toDouble() -(this->cameraMode==true?this->cameraOffsetY:0),
-                     17);
-        //this->jogTo(0,0,17);
-//        }
-//        else
-//        {
-//            QString mcCommand="G0 Z0 F3000\r\nG0 X"+ui->tableWidget->item(row,5)->text()+"Y"
-//                    +ui->tableWidget->item(row,6)->text()
-//                    + "\r\nG0 Z"+ui->tableWidget->item(row,7)->text()
-//                    +" F3000\r\n";
-//            QByteArray qba=mcCommand.toUtf8();
-//            mcPort->write(qba);
-//            locX=ui->tableWidget->item(row,5)->text().toDouble();
-//            locY=ui->tableWidget->item(row,6)->text().toDouble();
-//            locZ=ui->tableWidget->item(row,7)->text().toDouble();
-//            this->updateCoordinates();
-//        }
+                     0);
+        this->moveTo(locX,locY,20);
+
     }
     else if(column>=5&&column<=7&&ui->tableWidget->item(row,5)->text()!="-0")
     {
-        //this->moveTo(locX,locY,0);
+        this->moveTo(locX,locY,0);
         this->moveTo(ui->tableWidget->item(row,5)->text().toDouble() -(this->cameraMode==true?cameraOffsetX:0),
                      ui->tableWidget->item(row,6)->text().toDouble() -(this->cameraMode==true?cameraOffsetY:0),
-                     17);
-        //this->jogTo(0,0,ui->tableWidget->item(row,7)->text().toDouble());
-//        QString mcCommand="G0 Z0 F3000\r\nG0 X"+ui->tableWidget->item(row,5)->text()+"Y"
-//                +ui->tableWidget->item(row,6)->text()
-//                + "\r\nG0 Z"+ui->tableWidget->item(row,7)->text()
-//                +" F3000\r\n";
-//        QByteArray qba=mcCommand.toUtf8();
-//        mcPort->write(qba);
-//        locX=ui->tableWidget->item(row,5)->text().toDouble();
-//        locY=ui->tableWidget->item(row,6)->text().toDouble();
-//        locZ=ui->tableWidget->item(row,7)->text().toDouble();
-//        this->updateCoordinates();
+                     0);
+        this->moveTo(locX,locY,ui->tableWidget->item(row,7)->text().toDouble());
+
     }
     else if(column>=8&&column<=10&&ui->tableWidget->item(row,8)->text()!="-0")
     {
-        //this->moveTo(locX,locY,0);
+        this->moveTo(locX,locY,0);
         this->moveTo(ui->tableWidget->item(row,8)->text().toDouble() -(this->cameraMode==true?cameraOffsetX:0),
                      ui->tableWidget->item(row,9)->text().toDouble() -(this->cameraMode==true?cameraOffsetY:0),
-                     17);
-        //this->jogTo(0,0,ui->tableWidget->item(row,10)->text().toDouble());
+                     0);
+        this->moveTo(locX,locY,ui->tableWidget->item(row,10)->text().toDouble());
 
-//        QString mcCommand="G0 Z0 F3000\r\nG0 X"+ui->tableWidget->item(row,8)->text()+"Y"
-//                +ui->tableWidget->item(row,9)->text()
-//                + "\r\nG0 Z"+ui->tableWidget->item(row,10)->text()
-//                +" F3000\r\n";
-//        QByteArray qba=mcCommand.toUtf8();
-//        mcPort->write(qba);
-//        locX=ui->tableWidget->item(row,8)->text().toDouble();
-//        locY=ui->tableWidget->item(row,9)->text().toDouble();
-//        locZ=ui->tableWidget->item(row,10)->text().toDouble();
-//        this->updateCoordinates();
     }
 }
 
@@ -466,6 +436,7 @@ void MainWindow::on_MainWindow_destroyed()
 
 void MainWindow::on_actionSettings_triggered()
 {
+
     this->settingsDialog->exec();
 }
 void MainWindow::moveTo(double x, double y, double z)
@@ -473,8 +444,8 @@ void MainWindow::moveTo(double x, double y, double z)
     qDebug()<<x<<" "<<y<<" "<<z;
     QString jogCommand="G0 X"+QString::number(x)+"Y"+QString::number(y)+"Z"+QString::number(z)+ "\r\n";
     QByteArray qba=jogCommand.toUtf8();
-    //qba.append('e');
     mcPort->write(qba);
+    mcPort->waitForBytesWritten(1000);
     locX=x;
     locY=y;
     locZ=z;
@@ -485,8 +456,9 @@ void MainWindow::jogTo(double x, double y, double z)
 {
     QString jogCommand="$J=G91 G21 X"+QString::number(x)+"Y"+QString::number(y)+"Z"+QString::number(z)+ " F1000\r\n";
     QByteArray qba=jogCommand.toUtf8();
-    //qba.append('e');
+
     mcPort->write(qba);
+    mcPort->waitForBytesWritten(1000);
     locX+=x;
     locY+=y;
     locZ+=z;

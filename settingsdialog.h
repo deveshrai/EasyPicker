@@ -32,9 +32,12 @@ private slots:
 
     void on_pushButton_2_clicked();
 
+    void on_pushButton_3_clicked();
+
 private:
     Ui::SettingsDialog *ui;
     bool refreshPressed=false;
+    void setCameraOffset(void);
 };
 
 #endif // SETTINGSDIALOG_H

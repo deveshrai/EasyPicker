@@ -7,6 +7,11 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    QSettings settings("Devesh Rai", "Easy Picker");
+    ui->xCameraOffsetLE->setText(QString::number(settings.value("settings/xCameraOffset").toDouble()));
+    ui->yCameraOffsetLE->setText(QString::number(settings.value("settings/yCameraOffset").toDouble()));
+
+
 }
 
 SettingsDialog::~SettingsDialog()
@@ -60,5 +65,13 @@ void SettingsDialog::on_pushButton_2_clicked()
         ui->comboBox_2->addItem(port.portName());
     }
     this->refreshPressed=true;
+
+}
+
+void SettingsDialog::on_pushButton_3_clicked()
+{
+    QSettings settings("Devesh Rai", "Easy Picker");
+    settings.setValue("settings/xCameraOffset",ui->xCameraOffsetLE->text().toDouble());
+    settings.setValue("settings/yCameraOffset",ui->yCameraOffsetLE->text().toDouble());
 
 }

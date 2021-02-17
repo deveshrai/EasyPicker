@@ -29,17 +29,17 @@
         <item>
          <layout class="QGridLayout" name="gridLayout">
           <item row="0" column="0">
-           <widget class="QWidget" name="cameraView" native="true">
+           <widget class="QGraphicsView" name="cameraView">
             <property name="minimumSize">
              <size>
-              <width>200</width>
-              <height>200</height>
+              <width>240</width>
+              <height>240</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>200</width>
-              <height>200</height>
+              <width>240</width>
+              <height>240</height>
              </size>
             </property>
            </widget>
